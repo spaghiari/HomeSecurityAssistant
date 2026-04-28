@@ -55,13 +55,17 @@ STATIC_LOGO_PATH = Path(__file__).parent / "frontend" / "hsa-logo.svg"
 _MANIFEST_PATH = Path(__file__).parent / "manifest.json"
 
 
-def _panel_cache_buster() -> str:
+def _compute_panel_cache_buster() -> str:
     """Return a stable token that changes whenever the panel JS or version does.
 
     Combines integration version (from manifest.json) with the SHA-1 of the
     panel JS file. Either bumping the version or editing the JS in place is
     enough to change the URL — defeating browser, HA service-worker, and
     upstream reverse-proxy caches that key on the static URL.
+
+    Computed once at module import (synchronous I/O is fine here — this
+    runs before the event loop is active). Calling it from an async setup
+    path would trip HA's blocking-call detector.
     """
     try:
         version = json.loads(_MANIFEST_PATH.read_text("utf-8")).get("version", "0")
@@ -74,8 +78,11 @@ def _panel_cache_buster() -> str:
     return f"{version}.{digest}"
 
 
+_PANEL_CACHE_BUSTER = _compute_panel_cache_buster()
+
+
 def _panel_module_url() -> str:
-    return f"{STATIC_PANEL_URL}?v={_panel_cache_buster()}"
+    return f"{STATIC_PANEL_URL}?v={_PANEL_CACHE_BUSTER}"
 
 BRAND_DIR = Path(__file__).parent
 BRAND_FILES = [
