@@ -209,35 +209,40 @@ def _non_negative_int(value: object) -> int:
 
 
 def _build_schema(defaults: Mapping[str, object]) -> vol.Schema:
+    # Custom validators are wrapped in vol.All(<native_type>, validator) so
+    # voluptuous_serialize.convert() — used by HA to render the config form —
+    # can read a known type from each field. Bare callables raise
+    # `ValueError: Unable to convert schema: <function ...>` on HA 2026.4+.
+    int_coerce = vol.Coerce(int)
     return vol.Schema(
         {
-            vol.Required(CONF_BIND_HOST, default=defaults[CONF_BIND_HOST]): _validate_bind_host,
-            vol.Required(CONF_BIND_PORT, default=defaults[CONF_BIND_PORT]): _validate_port,
-            vol.Required(CONF_INTERNAL_NETWORKS, default=defaults[CONF_INTERNAL_NETWORKS]): _validate_networks,
-            vol.Required(CONF_SCAN_WINDOW_SECONDS, default=defaults[CONF_SCAN_WINDOW_SECONDS]): _positive_int,
-            vol.Required(CONF_SCAN_PORT_THRESHOLD, default=defaults[CONF_SCAN_PORT_THRESHOLD]): _positive_int,
-            vol.Required(CONF_HIGH_EGRESS_THRESHOLD, default=defaults[CONF_HIGH_EGRESS_THRESHOLD]): _positive_int,
+            vol.Required(CONF_BIND_HOST, default=defaults[CONF_BIND_HOST]): vol.All(str, _validate_bind_host),
+            vol.Required(CONF_BIND_PORT, default=defaults[CONF_BIND_PORT]): vol.All(int_coerce, _validate_port),
+            vol.Required(CONF_INTERNAL_NETWORKS, default=defaults[CONF_INTERNAL_NETWORKS]): vol.All(str, _validate_networks),
+            vol.Required(CONF_SCAN_WINDOW_SECONDS, default=defaults[CONF_SCAN_WINDOW_SECONDS]): vol.All(int_coerce, _positive_int),
+            vol.Required(CONF_SCAN_PORT_THRESHOLD, default=defaults[CONF_SCAN_PORT_THRESHOLD]): vol.All(int_coerce, _positive_int),
+            vol.Required(CONF_HIGH_EGRESS_THRESHOLD, default=defaults[CONF_HIGH_EGRESS_THRESHOLD]): vol.All(int_coerce, _positive_int),
             vol.Required(CONF_ENABLE_WEBUI, default=defaults[CONF_ENABLE_WEBUI]): bool,
             vol.Required(CONF_ENABLE_SCANNER, default=defaults[CONF_ENABLE_SCANNER]): bool,
-            vol.Required(CONF_SCAN_INTERVAL, default=defaults[CONF_SCAN_INTERVAL]): _positive_int,
-            vol.Optional(CONF_SCAN_PORTS, default=defaults[CONF_SCAN_PORTS]): _validate_ports,
-            vol.Optional(CONF_SCAN_EXCEPTIONS, default=defaults[CONF_SCAN_EXCEPTIONS]): _validate_ip_list,
+            vol.Required(CONF_SCAN_INTERVAL, default=defaults[CONF_SCAN_INTERVAL]): vol.All(int_coerce, _positive_int),
+            vol.Optional(CONF_SCAN_PORTS, default=defaults[CONF_SCAN_PORTS]): vol.All(str, _validate_ports),
+            vol.Optional(CONF_SCAN_EXCEPTIONS, default=defaults[CONF_SCAN_EXCEPTIONS]): vol.All(str, _validate_ip_list),
             vol.Required(CONF_ENABLE_DNS_RESOLUTION, default=defaults[CONF_ENABLE_DNS_RESOLUTION]): bool,
-            vol.Optional(CONF_BLACKLIST_URLS, default=defaults[CONF_BLACKLIST_URLS]): _validate_urls,
+            vol.Optional(CONF_BLACKLIST_URLS, default=defaults[CONF_BLACKLIST_URLS]): vol.All(str, _validate_urls),
             vol.Optional(CONF_IPINFO_TOKEN, default=defaults[CONF_IPINFO_TOKEN]): str,
             vol.Optional(CONF_VIRUSTOTAL_API_KEY, default=defaults[CONF_VIRUSTOTAL_API_KEY]): str,
             vol.Optional(CONF_SHODAN_API_KEY, default=defaults[CONF_SHODAN_API_KEY]): str,
             vol.Optional(CONF_ABUSEIPDB_API_KEY, default=defaults[CONF_ABUSEIPDB_API_KEY]): str,
-            vol.Optional(CONF_EXTERNAL_IP_RETENTION, default=defaults[CONF_EXTERNAL_IP_RETENTION]): _non_negative_int,
-            vol.Optional(CONF_ENRICHMENT_TTL_MINUTES, default=defaults[CONF_ENRICHMENT_TTL_MINUTES]): _positive_int,
-            vol.Optional(CONF_IPINFO_DAILY_BUDGET, default=defaults[CONF_IPINFO_DAILY_BUDGET]): _non_negative_int,
-            vol.Optional(CONF_VIRUSTOTAL_DAILY_BUDGET, default=defaults[CONF_VIRUSTOTAL_DAILY_BUDGET]): _non_negative_int,
-            vol.Optional(CONF_SHODAN_DAILY_BUDGET, default=defaults[CONF_SHODAN_DAILY_BUDGET]): _non_negative_int,
-            vol.Optional(CONF_ABUSEIPDB_DAILY_BUDGET, default=defaults[CONF_ABUSEIPDB_DAILY_BUDGET]): _non_negative_int,
+            vol.Optional(CONF_EXTERNAL_IP_RETENTION, default=defaults[CONF_EXTERNAL_IP_RETENTION]): vol.All(int_coerce, _non_negative_int),
+            vol.Optional(CONF_ENRICHMENT_TTL_MINUTES, default=defaults[CONF_ENRICHMENT_TTL_MINUTES]): vol.All(int_coerce, _positive_int),
+            vol.Optional(CONF_IPINFO_DAILY_BUDGET, default=defaults[CONF_IPINFO_DAILY_BUDGET]): vol.All(int_coerce, _non_negative_int),
+            vol.Optional(CONF_VIRUSTOTAL_DAILY_BUDGET, default=defaults[CONF_VIRUSTOTAL_DAILY_BUDGET]): vol.All(int_coerce, _non_negative_int),
+            vol.Optional(CONF_SHODAN_DAILY_BUDGET, default=defaults[CONF_SHODAN_DAILY_BUDGET]): vol.All(int_coerce, _non_negative_int),
+            vol.Optional(CONF_ABUSEIPDB_DAILY_BUDGET, default=defaults[CONF_ABUSEIPDB_DAILY_BUDGET]): vol.All(int_coerce, _non_negative_int),
             vol.Optional(CONF_NVD_API_KEY, default=defaults[CONF_NVD_API_KEY]): str,
-            vol.Optional(CONF_NVD_API_URL, default=defaults[CONF_NVD_API_URL]): _validate_urls,
-            vol.Optional(CONF_NVD_TTL_HOURS, default=defaults[CONF_NVD_TTL_HOURS]): _positive_int,
-            vol.Optional(CONF_NVD_MIN_YEAR, default=defaults[CONF_NVD_MIN_YEAR]): _non_negative_int,
+            vol.Optional(CONF_NVD_API_URL, default=defaults[CONF_NVD_API_URL]): vol.All(str, _validate_urls),
+            vol.Optional(CONF_NVD_TTL_HOURS, default=defaults[CONF_NVD_TTL_HOURS]): vol.All(int_coerce, _positive_int),
+            vol.Optional(CONF_NVD_MIN_YEAR, default=defaults[CONF_NVD_MIN_YEAR]): vol.All(int_coerce, _non_negative_int),
             vol.Optional(CONF_NVD_KEYWORDS, default=defaults[CONF_NVD_KEYWORDS]): str,
         }
     )
