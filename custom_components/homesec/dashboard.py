@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import ipaddress
+import json
 import logging
 import re
 from pathlib import Path
@@ -49,6 +51,31 @@ STATIC_PANEL_URL = "/api/homesec/frontend/homesec-panel.js"
 STATIC_PANEL_PATH = Path(__file__).parent / "frontend" / "homesec-panel.js"
 STATIC_LOGO_URL = "/api/homesec/frontend/hsa-logo.svg"
 STATIC_LOGO_PATH = Path(__file__).parent / "frontend" / "hsa-logo.svg"
+
+_MANIFEST_PATH = Path(__file__).parent / "manifest.json"
+
+
+def _panel_cache_buster() -> str:
+    """Return a stable token that changes whenever the panel JS or version does.
+
+    Combines integration version (from manifest.json) with the SHA-1 of the
+    panel JS file. Either bumping the version or editing the JS in place is
+    enough to change the URL — defeating browser, HA service-worker, and
+    upstream reverse-proxy caches that key on the static URL.
+    """
+    try:
+        version = json.loads(_MANIFEST_PATH.read_text("utf-8")).get("version", "0")
+    except Exception:  # noqa: BLE001 — fall back to file hash only if manifest is unreadable
+        version = "0"
+    try:
+        digest = hashlib.sha1(STATIC_PANEL_PATH.read_bytes()).hexdigest()[:8]
+    except OSError:
+        digest = "0"
+    return f"{version}.{digest}"
+
+
+def _panel_module_url() -> str:
+    return f"{STATIC_PANEL_URL}?v={_panel_cache_buster()}"
 
 BRAND_DIR = Path(__file__).parent
 BRAND_FILES = [
@@ -132,7 +159,7 @@ async def async_setup_dashboard(hass: HomeAssistant) -> None:
         hass,
         webcomponent_name=PANEL_COMPONENT,
         frontend_url_path=PANEL_URL_PATH,
-        module_url=STATIC_PANEL_URL,
+        module_url=_panel_module_url(),
         sidebar_title="Home Security Assistant",
         sidebar_icon="mdi:shield-search",
         require_admin=False,
@@ -496,6 +523,7 @@ class HomeSecPanelFallbackView(HomeAssistantView):
     requires_auth = True
 
     async def get(self, request):
+        module_url = _panel_module_url()
         html = f"""
 <!doctype html>
 <html lang=\"en\">
@@ -509,11 +537,13 @@ class HomeSecPanelFallbackView(HomeAssistantView):
 </head>
 <body>
     <homesec-panel></homesec-panel>
-    <script type=\"module\" src=\"{STATIC_PANEL_URL}\"></script>
+    <script type=\"module\" src=\"{module_url}\"></script>
 </body>
 </html>
 """
-        return web.Response(text=html, content_type="text/html")
+        response = web.Response(text=html, content_type="text/html")
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return response
 
 
 class HomeSecLookupView(HomeAssistantView):
