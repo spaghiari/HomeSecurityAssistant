@@ -35,6 +35,14 @@
           "nvd_keywords": "Mots-clés de recherche NVD (noms de produits séparés par des virgules)"
         }
       }
+    },
+    "error": {
+      "invalid_bind_host": "Hôte d'écoute invalide — doit être une adresse IP valide (utilisez 0.0.0.0 pour écouter sur toutes les interfaces).",
+      "invalid_internal_networks": "Réseaux internes invalides — CIDRs séparés par des virgules (ex. 10.0.0.0/8, 192.168.0.0/16).",
+      "invalid_scan_ports": "Ports à scanner invalides — utilisez des ports ou plages séparés par des virgules (ex. 22,80,443,8000-9000).",
+      "invalid_scan_exceptions": "Exceptions de scan invalides — adresses IP séparées par des virgules.",
+      "invalid_blacklist_urls": "URLs de threat intel invalides — URLs http(s) séparées par des virgules.",
+      "invalid_nvd_api_url": "URL de l'API NVD invalide — doit être une URL http(s) valide."
     }
   },
   "options": {
@@ -73,6 +81,14 @@
           "nvd_keywords": "Mots-clés de recherche NVD (noms de produits séparés par des virgules)"
         }
       }
+    },
+    "error": {
+      "invalid_bind_host": "Hôte d'écoute invalide — doit être une adresse IP valide (utilisez 0.0.0.0 pour écouter sur toutes les interfaces).",
+      "invalid_internal_networks": "Réseaux internes invalides — CIDRs séparés par des virgules (ex. 10.0.0.0/8, 192.168.0.0/16).",
+      "invalid_scan_ports": "Ports à scanner invalides — utilisez des ports ou plages séparés par des virgules (ex. 22,80,443,8000-9000).",
+      "invalid_scan_exceptions": "Exceptions de scan invalides — adresses IP séparées par des virgules.",
+      "invalid_blacklist_urls": "URLs de threat intel invalides — URLs http(s) séparées par des virgules.",
+      "invalid_nvd_api_url": "URL de l'API NVD invalide — doit être une URL http(s) valide."
     }
   },
   "services": {

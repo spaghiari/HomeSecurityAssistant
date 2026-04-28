@@ -35,6 +35,14 @@
           "nvd_keywords": "NVD search keywords (comma-separated product names)"
         }
       }
+    },
+    "error": {
+      "invalid_bind_host": "Invalid bind host — must be a valid IP address (use 0.0.0.0 to listen on all interfaces).",
+      "invalid_internal_networks": "Invalid internal networks — must be comma-separated CIDRs (e.g. 10.0.0.0/8, 192.168.0.0/16).",
+      "invalid_scan_ports": "Invalid scan ports — use comma-separated ports or ranges (e.g. 22,80,443,8000-9000).",
+      "invalid_scan_exceptions": "Invalid scan exceptions — must be comma-separated IP addresses.",
+      "invalid_blacklist_urls": "Invalid threat intel feed URLs — must be comma-separated http(s) URLs.",
+      "invalid_nvd_api_url": "Invalid NVD API URL — must be a valid http(s) URL."
     }
   },
   "options": {
@@ -73,6 +81,14 @@
           "nvd_keywords": "NVD search keywords (comma-separated product names)"
         }
       }
+    },
+    "error": {
+      "invalid_bind_host": "Invalid bind host — must be a valid IP address (use 0.0.0.0 to listen on all interfaces).",
+      "invalid_internal_networks": "Invalid internal networks — must be comma-separated CIDRs (e.g. 10.0.0.0/8, 192.168.0.0/16).",
+      "invalid_scan_ports": "Invalid scan ports — use comma-separated ports or ranges (e.g. 22,80,443,8000-9000).",
+      "invalid_scan_exceptions": "Invalid scan exceptions — must be comma-separated IP addresses.",
+      "invalid_blacklist_urls": "Invalid threat intel feed URLs — must be comma-separated http(s) URLs.",
+      "invalid_nvd_api_url": "Invalid NVD API URL — must be a valid http(s) URL."
     }
   },
   "services": {
